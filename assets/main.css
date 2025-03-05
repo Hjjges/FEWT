@@ -1,0 +1,105 @@
+/* App-wide styling */
+body {
+    background-color: #0f1116;
+    color: #ffffff;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 20px;
+}
+
+.folder, .file {
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    width: 80px;
+    height: 80px;
+    padding: 8px;
+
+    font-size: 12px;
+    word-wrap: break-word;
+    text-align: center;
+    overflow-wrap: break-word;
+
+    &:hover {
+        background-color: #1f1f1f;
+        cursor: pointer;
+    }
+
+    .file-img {
+        width: 50px;
+        height: 50px;
+        filter: invert(100%); /* used for inverting black to white on the svg */
+    }
+
+    .folder-img {
+        width: 50px;
+        height: 50px;
+    }
+
+}
+
+#header {
+    max-width: 1200px;
+}
+
+.path-tracker {
+    position: sticky;
+    padding: 0.5rem 1rem;
+    border: white 2px solid;
+    background-color: #222;
+    z-index: 10;
+}
+
+.side-bar {
+    display: flex;
+    position: fixed;
+    flex-direction: column;
+    gap: 10px;
+
+    padding: 10px;
+    margin-right: 400px;
+    top: 0;
+    left: 0;
+
+    height: 100vh;
+    min-width: 280px;
+
+    background-color: #222;
+    color: white;
+
+    overflow-y: auto;
+}
+
+
+/* bootstrap-esque styling */
+.button {
+    padding: 8px;
+    border-radius: 10px;
+    border: 2px solid transparent;
+    box-sizing: border-box;
+
+    &:hover {
+        filter: brightness(1.2);
+    }
+}
+
+.button-primary {
+    background-color: rgb(3, 22, 51);
+    border: 2px solid rgb(8, 66, 152);
+    color: #6ea8fe;
+}
+
+.button-secondary {
+    cursor: pointer;
+    background-color: #161719;
+    border: 2px solid #41464b;
+    color: #a7acb1;
+}
+
+/* general functionality */
+
+
+
+
+

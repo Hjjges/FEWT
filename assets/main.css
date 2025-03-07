@@ -3,7 +3,108 @@ body {
     background-color: #0f1116;
     color: #ffffff;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    margin: 20px;
+    padding: 0;
+    margin: 0;
+}
+
+#header {
+    max-width: 1200px;
+}
+
+
+/* =============== APPLICATION =============== */
+
+
+.app-container {
+    display: grid;
+    grid-template-columns: 250px 1fr;
+    grid-template-rows: 50px 1fr;
+    height: 100vh;
+}
+
+/* =============== TOP BAR =============== */
+
+.top-bar {
+    display: flex;
+
+    background-color: #222;
+    border-left: 2px solid #333;
+    border-bottom: 2px solid #333;
+    color: white;
+
+    grid-column: 2;
+    position: fixed;
+    z-index: 2;
+
+    height: 50px;
+    width: calc(100% - 250px);
+    top: 0px;
+    left: 250px;
+}
+
+.top-bar-content {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: left;
+    
+    padding: 0px 15px;
+    font-size: 18px;
+}
+
+.arrows-path-navigation {
+    width: 15px;
+    height: 15px;
+    padding-right: 6px;
+    filter: invert(100%);
+    opacity: 0.4;
+}
+
+
+
+/* =============== SIDE BAR =============== */
+
+.side-bar {
+    background-color: rgb(30, 30, 30);
+    border-right: 2px solid #333;
+    color: white;
+
+    grid-row: 1 / 3;
+    position: fixed;
+    overflow-y: auto;
+    z-index: 3;
+
+    width: 250px;
+    height: 100vh;
+}
+
+.side-bar-content {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 15px 15px;
+}
+
+.side-bar-entry {
+    margin-top: 15px;
+    padding-left: 4px;
+    padding-bottom: 8px;
+}
+
+.divider {
+    border: 2px solid white;
+    border-radius: 2px;
+    margin-top: 10px;
+    opacity: 0.4;
+}
+
+
+/* =============== FILE GRID =============== */
+.file-grid {
+    grid-column: 2;
+    z-index: 1;
+    padding-top: 10px;
+    padding-left: 0px;
 }
 
 .folder, .file {
@@ -36,70 +137,43 @@ body {
         width: 50px;
         height: 50px;
     }
-
 }
 
-#header {
-    max-width: 1200px;
-}
 
-.path-tracker {
-    position: sticky;
-    padding: 0.5rem 1rem;
-    border: white 2px solid;
-    background-color: #222;
-    z-index: 10;
-}
-
-.side-bar {
-    display: flex;
-    position: fixed;
-    flex-direction: column;
-    gap: 10px;
-
-    padding: 10px;
-    margin-right: 400px;
-    top: 0;
-    left: 0;
-
-    height: 100vh;
-    min-width: 280px;
-
-    background-color: #222;
-    color: white;
-
-    overflow-y: auto;
-}
-
+/* GENERAL */
 
 /* bootstrap-esque styling */
 .button {
     padding: 8px;
-    border-radius: 10px;
-    border: 2px solid transparent;
+    border-radius: 5px;
     box-sizing: border-box;
+    opacity: 0.8;
 
     &:hover {
-        filter: brightness(1.2);
+        opacity: 1;
     }
 }
 
 .button-primary {
     background-color: rgb(3, 22, 51);
-    border: 2px solid rgb(8, 66, 152);
+    border: 4px solid rgb(8, 66, 152);
     color: #6ea8fe;
 }
 
 .button-secondary {
     cursor: pointer;
     background-color: #161719;
-    border: 2px solid #41464b;
+    border: 1px solid #41464b;
     color: #a7acb1;
 }
 
-/* general functionality */
-
-
+.icon {
+    opacity: 0.4;
+    cursor: pointer;
+    &:hover {
+        opacity: 1;
+    }
+}
 
 
 

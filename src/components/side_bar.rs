@@ -1,71 +1,61 @@
 use dioxus::prelude::*;
 use std::path::PathBuf;
-use std::fs;
-
 
 use crate::utils::DirectoryContext;
-use crate::utils::ModeContext;
 
 #[component]
 pub fn SideBar() -> Element {
     let quick_access: Vec<PathBuf> = vec![
         PathBuf::from("/Users/hgregory/Documents"),
         PathBuf::from("/Users/hgregory/Downloads"),
+        PathBuf::from("/Users/hgregory/Desktop"),
+    ];
+
+    let favourites: Vec<PathBuf> = vec![
         PathBuf::from("/Users/hgregory/TestStuff"),
+        PathBuf::from("/Users/hgregory/FeralTools"),
+        PathBuf::from("/Users/hgregory/dumps"),
+        PathBuf::from("/Users/hgregory/Scripts")
     ];
     
-    let hgregory = PathBuf::from("/Users/hgregory");
-    let home_dirs = fs::read_dir(&hgregory)
-        .unwrap()
-        .filter_map(Result::ok)
-        .map(|entry| entry.path())
-        .collect::<Vec<PathBuf>>();
-
     rsx! {
-        div { class: "side-bar",
-            h3 { "Quick Access" }    
+        div { class: "side-bar-content",
+            QuickAccess { quick_access: quick_access.clone() }
+            Divider { }
+            Favourites { favourites: favourites.clone() }
+        }
+    }
+}
+
+
+#[component]
+fn Divider() -> Element {
+    rsx! {
+        div { class: "divider" }
+    }
+}
+
+#[component]
+fn QuickAccess(quick_access: Vec<PathBuf>) -> Element {
+    rsx! {
+        div { class: "side-bar-entry", "Quick Access" }    
             for folder in quick_access.clone() {
-                div { class: "button button-secondary", onclick: move |_| { consume_context::<DirectoryContext>().current_directory.set(folder.clone()); },
-                    "{folder.file_name().unwrap().to_string_lossy()}"
+                div { class: "button button-secondary", onclick: move |_| { consume_context::<DirectoryContext>().current_directory.set(folder.to_string_lossy().to_string()); },
+                    // add img here , cute icon?
+                    "{folder.file_name().unwrap().to_string_lossy().to_string()}"
                 }
             }
+    }
+}
 
-            div {
-                style: "border: white 1px solid; margin-top: 20px"
-            }
-
-            h3 { "Functionality" }   
-            button {
-                class: "button button-primary",
-                onclick: move |_| {
-                    let dir = use_context::<DirectoryContext>().current_directory.read().clone();
-                    if let Some(parent) = dir.parent() {
-                        consume_context::<DirectoryContext>().current_directory.set(parent.to_path_buf());
-                    }
-                
-                },
-                "Go back"
-            }
-            button {
-                class: "button button-primary",
-                onclick: move |_| {
-                    let test = *use_context::<ModeContext>().mode.read();
-                    consume_context::<ModeContext>().mode.set(!test)
-                },
-                div { "Icon Mode: " span { style: "color: yellow", "{use_context::<ModeContext>().mode.read()}" }}
-            }
-
-            div {
-                style: "border: white 1px solid; margin-top: 20px"
-            }
-
-            h3 { "Home" }
-            for folder in home_dirs.clone() {
-                div { class: "button button-secondary", onclick: move |_| { consume_context::<DirectoryContext>().current_directory.set(folder.clone()); },
-                    "{folder.file_name().unwrap().to_string_lossy()}"
-                }
+#[component]
+fn Favourites(favourites: Vec<PathBuf>) -> Element {
+    rsx! {
+        div { class: "side-bar-entry", "Favourites" }    
+        for folder in favourites {
+            div { class: "button button-secondary", onclick: move |_| { consume_context::<DirectoryContext>().current_directory.set(folder.file_name().unwrap().to_string_lossy().to_string()); },
+                "{folder.file_name().unwrap().to_string_lossy().to_string()}"
             }
         }
-        div { style: "margin-left: 260px; padding: 20px;" } // TODO: clean up this weird css formatting
     }
 }

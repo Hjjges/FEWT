@@ -1,13 +1,9 @@
-use dioxus::prelude::*;
-use std::path::PathBuf;
-
 mod components;
 mod utils;
 
-use components::SideBar;
-use components::FileExplorer;
-use utils::DirectoryContext;
-use utils::ModeContext;
+use dioxus::prelude::*;
+use components::{TopBar, SideBar, FileExplorer};
+use utils::{DirectoryContext, DirectoryHistory, ModeContext};
 
 static CSS: Asset = asset!("/assets/main.css");
 
@@ -18,11 +14,18 @@ fn main() {
 #[component]
 fn App() -> Element {
 
-    let directory_state= use_context_provider(|| DirectoryContext {
-        current_directory: Signal::new(PathBuf::from("/Users/hgregory/Documents")),
+    let env = std::env::current_dir().unwrap();
+    let current_dir = env.to_str().unwrap();
+
+    let directory_state = use_context_provider(|| DirectoryContext {
+        current_directory: Signal::new(current_dir.to_string()),
     });
 
-    use_context_provider(|| ModeContext { // store in variable if mode state needs to be used in this component, but for now its not
+    use_context_provider(|| DirectoryHistory { // 
+        directory_history: Signal::new(vec![current_dir.to_string()]),
+    });
+
+    use_context_provider(|| ModeContext {
         mode: Signal::new(true),
     });
 
@@ -47,12 +50,11 @@ fn App() -> Element {
 
     rsx! {
         document::Stylesheet { href: CSS }
-        div { style: "display: flex;",
-            SideBar {  }
-            FileExplorer { 
-                dir_path: directory_state.current_directory.read().clone().to_string_lossy(),
-                level: 0,
-            }
+        div {
+            class: "app-container",
+            div { class: "side-bar", SideBar {  } }
+            div { class: "top-bar", TopBar { }}
+            div { class: "file-grid", FileExplorer { dir_path: directory_state.current_directory.read(), level: 0 } }
         }
     }
 }

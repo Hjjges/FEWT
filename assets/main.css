@@ -7,13 +7,16 @@ body {
     margin: 0;
 }
 
+html, body {
+    overscroll-behavior: none !important;
+}
+
 #header {
     max-width: 1200px;
 }
 
 
 /* =============== APPLICATION =============== */
-
 
 .app-container {
     display: grid;
@@ -139,8 +142,27 @@ body {
     }
 }
 
+/* =============== TERMINAL =============== */
 
-/* GENERAL */
+.terminal-grid {
+    left: 251px;
+    bottom: 0;
+    width: calc(100% - 251px);
+    height: 40vh;
+    position: fixed;
+    overflow-y: scroll;
+    overscroll-behavior: none;
+    z-index: 5;
+    border-top: 1px solid #888;
+}
+
+.terminal {
+    border-left: 1px solid #888;
+}
+
+
+
+/* =============== GENERAL STYLING MODIFICATIONS =============== */
 
 /* bootstrap-esque styling */
 .button {

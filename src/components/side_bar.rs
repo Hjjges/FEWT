@@ -23,6 +23,8 @@ pub fn SideBar() -> Element {
             QuickAccess { quick_access: quick_access.clone() }
             Divider { }
             Favourites { favourites: favourites.clone() }
+            Divider { }
+            ToggleTerminal { }
         }
     }
 }
@@ -56,6 +58,20 @@ fn Favourites(favourites: Vec<PathBuf>) -> Element {
             div { class: "button button-secondary", onclick: move |_| { consume_context::<DirectoryContext>().current_directory.set(folder.file_name().unwrap().to_string_lossy().to_string()); },
                 "{folder.file_name().unwrap().to_string_lossy().to_string()}"
             }
+        }
+    }
+}
+
+#[component]
+fn ToggleTerminal() -> Element {
+    rsx! {
+        div { class: "button button-secondary", style: "display: flex; align-content: center; background-color: #932; opacity: 1; color: white; border: 2px solid black;", 
+            onclick: move |_| {
+                document::eval(
+                    r#"initTerminal('terminal-div');"#,
+                );
+            },
+            img { src: asset!("/assets/forward-media-step-svgrepo-com.svg"), style: "width: 15px; height: 15px; padding-right: 6px"}, "Terminal"
         }
     }
 }

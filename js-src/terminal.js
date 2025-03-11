@@ -46,41 +46,37 @@ window.initTerminal = function(containerId) {
 
     terminal.write(string);
     terminal.write('Dioxus Terminal Emulator - v0.1\r\n');
-    terminal.write('==> ');
+    terminal.write('$ ');
 
     terminal.onData(data => {
 
-        console.log("attempting to send new message");
-        window.dioxusBridge.sendToRust("Hi from JS!");
-        terminal.write('\r\n');
-        terminal.write('==> ');
-        currentCommand = '';
-
-
-        // if (data === '\r') {
-        //     terminal.write('\r\n');
-        //     terminal.write('$ ');
-        //     currentCommand = '';
-        // } else if (data === '\x7f' && currentCommand.length > 0) {
-        //     currentCommand = currentCommand.slice(0, -1);
-        //     terminal.write('\b \b');
-        // } else if (data >= ' ' && data <= '~') {
-        //     currentCommand += data;
-        //     terminal.write(data);
-        // }
+        // pressing enter needs to be async because 
+        if (data === '\r') {
+            window.dioxusBridge.sendToRust(currentCommand);
+            terminal.write('\r\n');
+            terminal.write('$ ');
+            currentCommand = '';
+        } else if (data === '\x7f' && currentCommand.length > 0) {
+            currentCommand = currentCommand.slice(0, -1);
+            terminal.write('\b \b');
+        } else if (data >= ' ' && data <= '~') {
+            currentCommand += data;
+            terminal.write(data);
+        }
     })
 
-    // implement writing mechanics later
-    // (async function() {{
-    //     while (true) {{
-    //         const output = await dioxus.recv();
-    //         terminal.write(output + '\r\n');
-    //         terminal.write('==> ');
-    //     }}
-    // }})();
+    (async function() {{
+        while (true) {{
+            const output = await window.dioxusBridge.receiveFromRust();
+            console.log("reached here");
+            terminal.write(output + '\r\n');
+            terminal.write('==> ');
+        }}
+    }})();
 }
 
 window.displayTerminalOutput = function(output) {
+    console.log(output);
     terminal.write(output + '\r\n');
-    terminal.write('==> ');
+    terminal.write('$ ');
 }

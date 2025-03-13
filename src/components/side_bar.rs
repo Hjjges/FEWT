@@ -1,26 +1,28 @@
+extern crate directories;
+
+use directories::{UserDirs, BaseDirs, ProjectDirs};
 use dioxus::prelude::*;
 use std::path::PathBuf;
-
 use crate::utils::DirectoryContext;
 use crate::components::ResizerBar;
 
 
 #[component]
 pub fn SideBar() -> Element {
+    let mut quick_access = Vec::new();
+    let mut favourites: Vec<PathBuf> = Vec::new(); // implement toml config
 
-    // Consider using SQLite file database for storing this information
-    let quick_access: Vec<PathBuf> = vec![
-        PathBuf::from("/Users/hgregory/Documents"),
-        PathBuf::from("/Users/hgregory/Downloads"),
-        PathBuf::from("/Users/hgregory/Desktop"),
-    ];
-
-    let favourites: Vec<PathBuf> = vec![
-        PathBuf::from("/Users/hgregory/TestStuff"),
-        PathBuf::from("/Users/hgregory/FeralTools"),
-        PathBuf::from("/Users/hgregory/dumps"),
-        PathBuf::from("/Users/hgregory/Scripts")
-    ];
+    if let Some(user_dirs) = UserDirs::new() {
+        let test = [
+            user_dirs.desktop_dir(),
+            user_dirs.document_dir(),
+            user_dirs.download_dir(),
+            user_dirs.video_dir(),
+        ];
+    
+        quick_access.extend(test.iter().flatten().map(|p| p.to_path_buf()));
+    }
+    
     
     rsx! {
         div { class: "side-bar",
@@ -38,7 +40,7 @@ pub fn SideBar() -> Element {
 #[component]
 fn SideBarEntry(entries: Vec<PathBuf>, title: String) -> Element {
     rsx! {
-        div { class: "side-bar-entry", "{title}" }
+        div { class: "side-bar-entry", span {"{title} +"} }
         for item in entries.clone() {
             div { class: "button button-secondary",
                 onclick: move |_| {

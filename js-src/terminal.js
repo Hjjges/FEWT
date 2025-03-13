@@ -4,8 +4,9 @@ import 'xterm/css/xterm.css';
 
 let terminal;
 let currentCommand = '';
+const fitAddon = new FitAddon();
+window.fitAddon = fitAddon;
 
-console.log("SCREAMING FOR HELP RAGH");
 
 window.initTerminal = function(containerId) {
 
@@ -16,18 +17,16 @@ window.initTerminal = function(containerId) {
     }
 
     console.log("Initializing terminal with Dioxus bridge");
-    
 
     terminal = new Terminal({
         cursorBlink: true,
         theme: {
-            background: 'black',
+            background: '#181818',
             foreground: '#f0f0f0'
         },
         fontSize: 12
     });
 
-    const fitAddon = new FitAddon();
     terminal.loadAddon(fitAddon);
 
     terminal.open(document.getElementById(containerId));
@@ -36,12 +35,12 @@ window.initTerminal = function(containerId) {
     window.addEventListener('resize', () => fitAddon.fit());
 
     let string = `
-    \x1b[31m██████╗ \x1b[31m██╗ \x1b[31m██████╗ \x1b[31m██╗  ██╗\x1b[0m\x1b[31m██╗   ██╗\x1b[31m███████╗\x1b[0m\r\n
-    \x1b[31m██╔══██╗\x1b[31m██║\x1b[31m██╔═══██╗\x1b[31m╚██╗██╔╝\x1b[0m\x1b[31m██║   ██║\x1b[31m██╔════╝\x1b[0m\r\n
-    \x1b[31m██║  ██║\x1b[31m██║\x1b[31m██║   ██║\x1b[31m ╚███╔╝\x1b[0m\x1b[31m ██║   ██║\x1b[31m███████╗\x1b[0m\r\n
-    \x1b[31m██║  ██║\x1b[31m██║\x1b[31m██║   ██║\x1b[31m ██╔██╗\x1b[0m\x1b[31m ██║   ██║\x1b[31m╚════██║\x1b[0m\r\n
-    \x1b[31m██████╔╝\x1b[31m██║\x1b[31m╚██████╔╝\x1b[31m██╔╝ ██╗\x1b[0m\x1b[31m╚██████╔╝\x1b[31m███████║\x1b[0m\r\n
-    \x1b[31m╚═════╝ \x1b[31m╚═╝ \x1b[31m╚═════╝ \x1b[31m╚═╝  ╚═╝\x1b[0m\x1b[31m╚═════╝ \x1b[31m╚══════╝\x1b[0m\r\n
+    \x1b[38;2;0;120;213m██████╗\x1b[38;2;0;120;213mm██╗ \x1b[38;2;0;120;213m██████╗ \x1b[38;2;0;120;213m██╗  ██╗\x1b[0m\x1b[38;2;0;120;213m██╗   ██╗\x1b[38;2;0;120;213m███████╗\x1b[0m\r\n
+    \x1b[38;2;0;120;213m██╔══██╗\x1b[38;2;0;120;213m██║\x1b[38;2;0;120;213m██╔═══██╗\x1b[38;2;0;120;213m╚██╗██╔╝\x1b[0m\x1b[38;2;0;120;213m██║   ██║\x1b[38;2;0;120;213m██╔════╝\x1b[0m\r\n
+    \x1b[38;2;0;120;213m██║  ██║\x1b[38;2;0;120;213m██║\x1b[38;2;0;120;213m██║   ██║\x1b[38;2;0;120;213m ╚███╔╝\x1b[0m\x1b[38;2;0;120;213m ██║   ██║\x1b[38;2;0;120;213m███████╗\x1b[0m\r\n
+    \x1b[38;2;0;120;213m██║  ██║\x1b[38;2;0;120;213m██║\x1b[38;2;0;120;213m██║   ██║\x1b[38;2;0;120;213m ██╔██╗\x1b[0m\x1b[38;2;0;120;213m ██║   ██║\x1b[38;2;0;120;213m╚════██║\x1b[0m\r\n
+    \x1b[38;2;0;120;213m██████╔╝\x1b[38;2;0;120;213m██║\x1b[38;2;0;120;213m╚██████╔╝\x1b[38;2;0;120;213m██╔╝ ██╗\x1b[0m\x1b[38;2;0;120;213m╚██████╔╝\x1b[38;2;0;120;213m███████║\x1b[0m\r\n
+    \x1b[38;2;0;120;213m╚═════╝ \x1b[38;2;0;120;213m╚═╝ \x1b[38;2;0;120;213m╚═════╝ \x1b[38;2;0;120;213m╚═╝  ╚═╝\x1b[0m\x1b[38;2;0;120;213m╚═════╝ \x1b[38;2;0;120;213m╚══════╝\x1b[0m\r\n
     `;
 
     terminal.write(string);
@@ -68,7 +67,6 @@ window.initTerminal = function(containerId) {
     (async function() {{
         while (true) {{
             const output = await window.dioxusBridge.receiveFromRust();
-            console.log("reached here");
             terminal.write(output + '\r\n');
             terminal.write('==> ');
         }}
@@ -76,7 +74,18 @@ window.initTerminal = function(containerId) {
 }
 
 window.displayTerminalOutput = function(output) {
-    console.log(output);
     terminal.write(output + '\r\n');
     terminal.write('$ ');
+}
+
+window.fitTerminal = function() {
+    fitAddon.fit();
+}
+
+window.hideTerminal = function(containerId) {
+    document.getElementById(containerId).classList.remove('show');
+}
+
+window.showTerminal = function(containerId) {
+    document.getElementById(containerId).classList.add('show');
 }

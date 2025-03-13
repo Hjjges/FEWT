@@ -2,9 +2,13 @@ use dioxus::prelude::*;
 use std::path::PathBuf;
 
 use crate::utils::DirectoryContext;
+use crate::components::ResizerBar;
+
 
 #[component]
 pub fn SideBar() -> Element {
+
+    // Consider using SQLite file database for storing this information
     let quick_access: Vec<PathBuf> = vec![
         PathBuf::from("/Users/hgregory/Documents"),
         PathBuf::from("/Users/hgregory/Downloads"),
@@ -19,59 +23,35 @@ pub fn SideBar() -> Element {
     ];
     
     rsx! {
-        div { class: "side-bar-content",
-            QuickAccess { quick_access: quick_access.clone() }
-            Divider { }
-            Favourites { favourites: favourites.clone() }
-            Divider { }
-            ToggleTerminal { }
+        div { class: "side-bar",
+            div { class: "side-bar-container",
+            div { style: "grid-column: 1; border-right: 1px solid #333;",
+                SideBarEntry { entries: quick_access.clone(), title: "QUICK ACCESS" }
+                Divider { }
+                SideBarEntry { entries: favourites.clone(), title: "FAVOURITES" }
+            }
+            ResizerBar { class: "resizer-side", custom_style: "grid-column: 2;"} }
         }
     }
 }
 
+#[component]
+fn SideBarEntry(entries: Vec<PathBuf>, title: String) -> Element {
+    rsx! {
+        div { class: "side-bar-entry", "{title}" }
+        for item in entries.clone() {
+            div { class: "button button-secondary",
+                onclick: move |_| {
+                    consume_context::<DirectoryContext>().current_directory.set(item.to_string_lossy().to_string());
+                },
+                div { "{item.file_name().unwrap().to_string_lossy().to_string()}" }
+            }
+        }
+    }
+
+}
 
 #[component]
 fn Divider() -> Element {
-    rsx! {
-        div { class: "divider" }
-    }
-}
-
-#[component]
-fn QuickAccess(quick_access: Vec<PathBuf>) -> Element {
-    rsx! {
-        div { class: "side-bar-entry", "Quick Access" }    
-            for folder in quick_access.clone() {
-                div { class: "button button-secondary", onclick: move |_| { consume_context::<DirectoryContext>().current_directory.set(folder.to_string_lossy().to_string()); },
-                    // add img here , cute icon?
-                    "{folder.file_name().unwrap().to_string_lossy().to_string()}"
-                }
-            }
-    }
-}
-
-#[component]
-fn Favourites(favourites: Vec<PathBuf>) -> Element {
-    rsx! {
-        div { class: "side-bar-entry", "Favourites" }    
-        for folder in favourites {
-            div { class: "button button-secondary", onclick: move |_| { consume_context::<DirectoryContext>().current_directory.set(folder.file_name().unwrap().to_string_lossy().to_string()); },
-                "{folder.file_name().unwrap().to_string_lossy().to_string()}"
-            }
-        }
-    }
-}
-
-#[component]
-fn ToggleTerminal() -> Element {
-    rsx! {
-        div { class: "button button-secondary", style: "display: flex; align-content: center; background-color: #932; opacity: 1; color: white; border: 2px solid black;", 
-            onclick: move |_| {
-                document::eval(
-                    r#"initTerminal('terminal-div');"#,
-                );
-            },
-            img { src: asset!("/assets/forward-media-step-svgrepo-com.svg"), style: "width: 15px; height: 15px; padding-right: 6px"}, "Terminal"
-        }
-    }
+    rsx! { div { class: "divider" } }
 }

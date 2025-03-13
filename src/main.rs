@@ -2,7 +2,7 @@ mod components;
 mod utils;
 mod helpers;
 
-use dioxus::prelude::*;
+use dioxus::{logger::tracing, prelude::*};
 use components::{TopBar, SideBar, FileExplorer, TerminalComponent, BottomBar};
 use utils::{initialize_bash, initialize_dioxus_bridge, AppConfig, DirectoryContext, DirectoryHistory, ModeContext};
 
@@ -23,13 +23,13 @@ fn App() -> Element {
     // Testing loading app config
     let app_config = match AppConfig::load() {
         Ok(config) => config,
-        Err(e) => { eprintln!("Error loading config: {}", e); AppConfig::default() }
+        Err(e) => { tracing::error!("Error loading config: {}", e); AppConfig::default() }
     };
 
     // Testing to see if app config global provider works
     use_context_provider(|| app_config);
     let test = use_context::<AppConfig>().quick_access;
-    println!("{:#?}", test);
+    tracing::info!("{:#?}", test);
     // End testing
 
     initialize_bash();

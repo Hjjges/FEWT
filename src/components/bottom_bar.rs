@@ -1,4 +1,5 @@
 use dioxus::prelude::*;
+use dioxus::logger::tracing;
 
 use crate::components::ResizerBar;
 
@@ -32,7 +33,7 @@ fn BottomBarButton(header: String) -> Element {
             onclick: move |_| {
                 selected.set(!selected());
                 if header.starts_with("TERMINAL") && !terminal_only() { 
-                    println!("toggling"); 
+                    tracing::info!("toggling"); 
                     document::eval(r#"window.initTerminal('terminal-div')"#);
                     terminal_only.set(true); 
                 };

@@ -1,4 +1,5 @@
 use dioxus::prelude::*;
+use dioxus::logger::tracing;
 use std::path::PathBuf;
 use std::rc::Rc;
 
@@ -32,7 +33,7 @@ fn BackArrow(dir: String) -> Element {
                     consume_context::<DirectoryContext>().current_directory.set(str.clone());
                     consume_context::<DirectoryHistory>().directory_history.write().push(dir.clone())
                 } else {
-                    println!("No back directories remaining in stack");
+                    tracing::warn!("No back directories remaining in stack");
                 }
             }, 
             "<",
@@ -50,7 +51,7 @@ fn ForwardArrow(dir: String) -> Element {
                 if let Some(popped_dir) = history {
                     consume_context::<DirectoryContext>().current_directory.set(popped_dir);
                 } else {
-                    println!("No forward directories left in stack");
+                    tracing::warn!("No forward directories left in stack");
                 }
             }, 
             ">" 

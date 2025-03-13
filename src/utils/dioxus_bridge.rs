@@ -1,3 +1,4 @@
+use dioxus::logger::tracing;
 use dioxus::prelude::*;
 use std::io::{BufRead, BufReader, Write};
 use std::fmt::Write as plat;
@@ -53,7 +54,7 @@ pub fn initialize_dioxus_bridge() -> Task {
         "#);
 
         while let Ok(message) = eval.recv::<String>().await {
-            println!("Received from JS: {}", message);
+            tracing::info!("Received from JS: {}", message);
             let shell = use_context::<ShellContext>();
             send_command(&shell, &message);
         }
@@ -65,7 +66,7 @@ pub fn send_command(shell: &ShellContext, command: &str) {
 
     shell.stdout.lock().unwrap().clear();
 
-    println!("{}", "Sending command to bash instance");
+    tracing::info!("{}", "Sending command to bash instance");
     let mut stdin = shell.stdin.lock().unwrap();
     writeln!(stdin, "{}", command).expect("Failed to write to shell");
     
@@ -148,7 +149,7 @@ pub fn initialize_bash() {
     //     loop {
     //         thread::sleep(Duration::from_secs(15));
     //         let output = stdout_clone_b.lock().unwrap();
-    //         println!("Shell Output History:\n{}", output.join("\n"));
+    //         tracing::info!("Shell Output History:\n{}", output.join("\n"));
     //     }
     // });
 
@@ -157,5 +158,5 @@ pub fn initialize_bash() {
         stdout
     });
 
-    println!("{}", "Successfully created bash instance");
+    tracing::info!("{}", "Successfully created bash instance");
 }

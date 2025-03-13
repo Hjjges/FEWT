@@ -1,3 +1,4 @@
+use dioxus::logger::tracing;
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::env;
@@ -36,11 +37,14 @@ impl Default for AppConfig {
 
 impl AppConfig {
     pub fn load() -> Result<Self, io::Error> {
-        let config_path = Self::get_config_path()?;
+        let config_path = Self::get_config_path();
 
+        tracing::info!("Attempting to read from path: {}", config_path.to_string_lossy());
         if !config_path.exists() {
-            println!("Config path does not exist");
-            return Ok(Self::default());
+            tracing::warn!("Config path does not exist, creating default at: {}", config_path.to_string_lossy());
+            let this= Self::default();
+            this.save()?;
+            return Ok(this);
         }
 
         // Read the config.toml file into memory
@@ -48,12 +52,13 @@ impl AppConfig {
         let config = toml::from_str(&config_str)
             .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?;
 
+        tracing::info!("Config found and loaded");
 
         Ok(config)
     }
 
     pub fn save(&self) -> Result<(), io::Error> {
-        let config_path = Self::get_config_path()?;
+        let config_path = Self::get_config_path();
         if let Some(parent) = config_path.parent() {
             fs::create_dir_all(parent)?;
         }
@@ -61,6 +66,7 @@ impl AppConfig {
         let toml_string = toml::to_string(self)
             .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?;
 
+        tracing::info!("Writing to path: {}", config_path.to_string_lossy());
         fs::write(config_path, toml_string)
     }
 
@@ -74,42 +80,30 @@ impl AppConfig {
         self.favourites.retain(|p| p != path);
     }
 
-    fn get_config_path() -> Result<PathBuf, io::Error> {
-        let username = env::var("USERNAME")
-            .or_else(|_| env::var("USER"))
-            .unwrap_or_else(|_| "user".to_string());
-
-        let config_path = if let Some(proj_dirs) = ProjectDirs::from("", &username, "rust_file_explorer") {
+    fn get_config_path() -> PathBuf {
+        if let Some(proj_dirs) = ProjectDirs::from("", "", env!("CARGO_PKG_NAME")) {
             proj_dirs.config_dir().to_path_buf()
         } else {
-            let fallback_path = fallback_config_dir();
-            if let Err(e) = fs::create_dir_all(&fallback_path) {
-                eprintln!("Failed to create config directory: {}", e);
-            } else {
-                println!("Created fallback config directory at {:?}", fallback_path);
-            }
-            Ok(fallback_path)
-        };
-    
+            AppConfig::fallback_config_dir()
+        }
+            .join("config.toml")
+    }
 
-        let config_dir = proj_dirs.config_dir();
-        Ok(config_dir.join("config.toml"))
-    }
-}
-
-fn fallback_config_dir() -> PathBuf {
-    #[cfg(target_os = "linux")]
-    {
-        UserDirs::home_dir().map(|home| home.join("...")).unwrap()
-    }
-    #[cfg(target_os = "windows")]
-    {
-        UserDirs::data_dir().map(|data| data.join("...")).unwrap()
-    }
-    #[cfg(target_os = "macos")]
-    {
-        UserDirs::home_dir()
-            .map(|home| home.join("Library/Application Support/..."))
-            .unwrap()
+    fn fallback_config_dir() -> PathBuf {
+        #[cfg(target_os = "linux")]
+        {
+            UserDirs::home_dir().map(|home| home.join("...")).unwrap()
+        }
+        #[cfg(target_os = "windows")]
+        {
+            UserDirs::data_dir().map(|data| data.join("...")).unwrap()
+        }
+        #[cfg(target_os = "macos")]
+        {
+            UserDirs::new()
+                .unwrap_or_else(|| todo!("Display unknown home path error"))
+                .home_dir()
+                .join("Library/Application Support/")
+        }
     }
 }

@@ -1,10 +1,7 @@
-extern crate directories;
-
 use dioxus::prelude::*;
 use std::path::PathBuf;
-use crate::utils::{AppConfig, DirectoryContext};
+use crate::utils::{AppConfig, DirectoryContext, DioxusContextMenu};
 use crate::components::ResizerBar;
-
 
 #[component]
 pub fn SideBar() -> Element {
@@ -29,6 +26,20 @@ fn SideBarEntry(entries: Vec<PathBuf>, title: String) -> Element {
             div { class: "button button-secondary",
                 onclick: move |_| {
                     consume_context::<DirectoryContext>().current_directory.set(item.to_string_lossy().to_string());
+                },
+                oncontextmenu: move |evt| {
+                    evt.prevent_default(); 
+                    DioxusContextMenu::default();
+                    // let menu = Menu::new();
+                    // let copy_item = MenuItem::new("Copy", true, None);
+                    // let paste_item = MenuItem::new("Paste", true, None);
+                    // let separator = PredefinedMenuItem::separator();
+                    // menu.append(&copy_item).unwrap();
+                    // menu.append(&paste_item).unwrap();
+                    // menu.append(&separator).unwrap();
+                    // let ns_view = dioxus_desktop::use_window().ns_view();
+                    // let ns_view_id: id = unsafe { std::mem::transmute(ns_view) };
+                    // menu.show_context_menu_for_nsview(ns_view_id, None);
                 },
                 div { "{item.file_name().unwrap().to_string_lossy().to_string()}" }
             }

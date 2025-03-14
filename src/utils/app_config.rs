@@ -90,6 +90,7 @@ impl AppConfig {
     }
 
     fn fallback_config_dir() -> PathBuf {
+        // Implement the other operating system paths later
         #[cfg(target_os = "linux")]
         {
             UserDirs::home_dir().map(|home| home.join("...")).unwrap()

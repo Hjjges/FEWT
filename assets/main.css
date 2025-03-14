@@ -259,4 +259,34 @@ body {
     transition: background-color 0.3s cubic-bezier(0.95, 0, 1, 1);
 }
 
+.context-menu {
+    z-index: 6; 
+    display: flex;
+    flex-direction: column;
+    align-content: space-evenly; 
+    justify-content: start; 
+    position: fixed; 
+    background: black; 
+    border: 1px solid turquoise; 
+    padding: 8px;
+    border-radius: 5px; 
+    font-size: 14px; 
+    flex-wrap: nowrap;
+    text-wrap: nowrap;
+
+    span {
+        border-radius: 2px;
+        padding: 0px 6px;
+        cursor: pointer;
+        &:hover {
+            color: black;
+            background-color: turquoise;
+        }
+    }
+}
+
+.context-menu-divider {
+    
+}
+
 

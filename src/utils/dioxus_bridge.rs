@@ -64,6 +64,8 @@ pub fn initialize_dioxus_bridge() -> Task {
 pub fn send_command(shell: &ShellContext, command: &str) {
 
 
+    // im thinking wrap this into a use_resource hook, return the value and then display terminal output.
+    // although the issue here is that you write to stdin and stdout is populated, so its not a 'taskable' resource
     shell.stdout.lock().unwrap().clear();
 
     tracing::info!("{}", "Sending command to bash instance");
@@ -84,7 +86,16 @@ pub fn send_command(shell: &ShellContext, command: &str) {
     let output = format!(r#"window.displayTerminalOutput("{}");"#, escaped_output);
     document::eval(&output);
 
+    // Update the current directory the one just used?
+    if command.starts_with("cd") {
+        writeln!(stdin, "{}", "pwd").expect("Failed to write to shell");
+        thread::sleep(Duration::from_millis(100));
+        let stdout_clone_b: Arc<Mutex<Vec<String>>> = shell.stdout.clone();
+        let raw_output_b = stdout_clone_b.lock().unwrap().join("");
 
+        // slight issue: it has the whole history when trying to change directory.
+        consume_context::<DirectoryContext>().current_directory.set(raw_output_b);
+    }
 }
 
 /*

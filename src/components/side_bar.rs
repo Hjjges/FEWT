@@ -21,7 +21,7 @@ pub fn SideBar() -> Element {
 #[component]
 fn SideBarEntry(entries: Vec<PathBuf>, title: String) -> Element {
     rsx! {
-        div { class: "side-bar-entry", span {"{title} +"} }
+        div { class: "side-bar-entry", span {"{title}"} }
         for item in entries.clone() {
             div { class: "button button-secondary",
                 onclick: move |_| {

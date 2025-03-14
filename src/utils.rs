@@ -13,4 +13,4 @@ pub use shell_context::ShellContext;
 pub use extension_detection::detect_extension;
 pub use dioxus_bridge::{initialize_bash, initialize_dioxus_bridge, send_command};
 pub use app_config::AppConfig;
-pub use context_menu::DioxusContextMenu;
+pub use context_menu::{CurrentCopiedPath, DioxusContextMenu};

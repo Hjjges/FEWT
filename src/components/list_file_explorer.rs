@@ -3,7 +3,7 @@ use std::path::PathBuf;
 use std::fs;
 use chrono::{DateTime, Utc};
 
-use crate::utils::{DioxusContextMenu, detect_extension};
+use crate::utils::{DioxusContextMenu, detect_extension, CurrentCopiedPath};
 use crate::helpers::get_paths;
 use crate::components::FileExplorer;
 
@@ -54,11 +54,13 @@ fn ListFile(path: PathBuf, level: usize) -> Element {
             onclick: move |_| {
                 focused.toggle();
             },
-            style: "border-bottom: 4px solid #222; border-top: 2px solid #111; padding: 4px 4px 4px {level * 22 + 10}px; background-color: {background_color};",
+            class: "list-file",
+            style: "padding: 4px 4px 4px {level * 22 + 10}px; background-color: {background_color};",
 
             div { style: "font-size: 14px", 
                 oncontextmenu: move |e| {
                     e.prevent_default(); 
+                    consume_context::<CurrentCopiedPath>().path.set(path.to_string_lossy().to_owned().to_string());
                     DioxusContextMenu::default();
                 },
                 div { style: "display: inline-flex; width: 60%", 
@@ -96,12 +98,14 @@ fn ListFolder(path: PathBuf, level: usize) -> Element {
                 is_expanded.toggle();
                 focused.toggle();
              },
-            style: "border-bottom: 4px solid #222; border-top: 2px solid #111; padding: 4px 4px 4px {level * 22 + 10}px; background-color: {background_color};",
+            class: "list-folder",
+            style: "padding: 4px 4px 4px {level * 22 + 10}px; background-color: {background_color};",
 
             div { style: "font-size: 14px;", 
                 div { style: "display: inline-flex; width: 60%;", 
                     oncontextmenu: move |e| {
                         e.prevent_default(); 
+                        consume_context::<CurrentCopiedPath>().path.set(path.to_string_lossy().to_owned().to_string());
                         DioxusContextMenu::default();
                     },
                     if is_expanded()

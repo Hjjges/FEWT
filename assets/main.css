@@ -237,7 +237,9 @@ body {
     border-top: 1px solid #333;
     border-bottom: 1px solid #333;
     border-left: 4px solid #399;
-    transition: border-left 0.3s ease;
+    transition: border-bottom 0.3s ease, border-left 0.3s ease, border-top 0.3s ease;
+
+
     /*transition: background-color 0.3s ease;*/
     color: #a7acb1;
 
@@ -252,7 +254,8 @@ body {
 
         /* Dynamicaly move border to the right, changing it to turq */
         border-left: 16px solid turquoise;
-
+        border-top: 1px solid turquoise;
+        border-bottom: 1px solid turquoise;
         /* Move the text 5px to the right and change color */
         div {
             color: white;

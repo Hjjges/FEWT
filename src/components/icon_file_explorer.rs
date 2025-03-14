@@ -1,7 +1,7 @@
 use dioxus::prelude::*;
 use std::path::PathBuf;
-
-use crate::utils::{DirectoryContext, DirectoryHistory};
+use dioxus_desktop::muda::MenuEvent;
+use crate::utils::{DirectoryContext, DirectoryHistory, DioxusContextMenu};
 use crate::helpers::get_paths;
 
 const IMG_FILE: Asset = asset!("/assets/icons8-file.svg");
@@ -9,6 +9,12 @@ const IMG_FOLDER: Asset = asset!("/assets/folder-svgrepo-com.svg");
 
 #[component]
 pub fn IconFileExplorer(dir_path: String) -> Element {
+    std::thread::spawn(move || {
+        let receiver = MenuEvent::receiver();
+        while let Ok(e) = receiver.try_recv() {
+            println!("hello");
+        }
+    });
     let paths = get_paths(dir_path);
     rsx! {
         div {
@@ -29,6 +35,10 @@ fn IconFile(path: String) -> Element {
     let file_name = PathBuf::from(&path).file_name().unwrap().to_string_lossy().to_string();
     rsx! {
         div { class: "file",
+            oncontextmenu: move |e| {
+                e.prevent_default(); 
+                DioxusContextMenu::default();
+            },
             img { src: IMG_FILE, class: "file-img" }
             p { "{file_name}" }
         }
@@ -41,6 +51,10 @@ fn IconFolder(path: String) -> Element {
     rsx! {
         div { 
             class: "folder", 
+            oncontextmenu: move |e| {
+                e.prevent_default(); 
+                DioxusContextMenu::default();
+            },
             onclick: move |_| { 
                 consume_context::<DirectoryContext>().current_directory.set(path.clone());
                 let history = use_context::<DirectoryHistory>().directory_history.read().clone();

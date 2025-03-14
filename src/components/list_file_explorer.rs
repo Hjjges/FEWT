@@ -3,7 +3,7 @@ use std::path::PathBuf;
 use std::fs;
 use chrono::{DateTime, Utc};
 
-use crate::utils::detect_extension;
+use crate::utils::{DioxusContextMenu, detect_extension};
 use crate::helpers::get_paths;
 use crate::components::FileExplorer;
 
@@ -57,16 +57,20 @@ fn ListFile(path: PathBuf, level: usize) -> Element {
             style: "border-bottom: 4px solid #222; border-top: 2px solid #111; padding: 4px 4px 4px {level * 22 + 10}px; background-color: {background_color};",
 
             div { style: "font-size: 14px", 
-                        div { style: "display: inline-flex; width: 60%", 
-                            img { src: IMG_FILE, style: "width: 16px; height: 18px; padding-right: 8px;"}
-                            "{path.file_name().unwrap().to_string_lossy()}" 
-                        }
-                        if let Some(ext) = path.extension() {
-                            div { style: "display: inline-flex; width: 20%", "{detect_extension(ext.to_string_lossy().to_string())} " }
-                        } else {
-                            div { style: "display: inline-flex; width: 20%", "File" }
-                        }
-                        div { style: "display: inline-flex; width; 20%", "{date}" }
+                oncontextmenu: move |e| {
+                    e.prevent_default(); 
+                    DioxusContextMenu::default();
+                },
+                div { style: "display: inline-flex; width: 60%", 
+                    img { src: IMG_FILE, style: "width: 16px; height: 18px; padding-right: 8px;"}
+                    "{path.file_name().unwrap().to_string_lossy()}" 
+                }
+                if let Some(ext) = path.extension() {
+                    div { style: "display: inline-flex; width: 20%", "{detect_extension(ext.to_string_lossy().to_string())} " }
+                } else {
+                    div { style: "display: inline-flex; width: 20%", "File" }
+                }
+                div { style: "display: inline-flex; width; 20%", "{date}" }
             }
         }
     }
@@ -95,16 +99,20 @@ fn ListFolder(path: PathBuf, level: usize) -> Element {
             style: "border-bottom: 4px solid #222; border-top: 2px solid #111; padding: 4px 4px 4px {level * 22 + 10}px; background-color: {background_color};",
 
             div { style: "font-size: 14px;", 
-                        div { style: "display: inline-flex; width: 60%;", 
-                            if is_expanded()
-                                { div { style: "color: turquoise; margin-right: 8px;", " ↓ "} }
-                            else
-                                { div { style: "color: turquoise; margin-right: 8px;", " → "} }
-                            img { src: IMG_FOLDER, style: "width: 16px; height: 18px; padding-right: 8px;"}
-                            "{path.file_name().unwrap().to_string_lossy()}" 
-                        }
-                        div { style: "display: inline-flex; width: 20%", "Folder" }
-                        div { style: "display: inline-flex; width; 20%", "{date}" }
+                div { style: "display: inline-flex; width: 60%;", 
+                    oncontextmenu: move |e| {
+                        e.prevent_default(); 
+                        DioxusContextMenu::default();
+                    },
+                    if is_expanded()
+                        { div { style: "color: turquoise; margin-right: 8px;", " ↓ "} }
+                    else
+                        { div { style: "color: turquoise; margin-right: 8px;", " → "} }
+                    img { src: IMG_FOLDER, style: "width: 16px; height: 18px; padding-right: 8px;"}
+                    "{path.file_name().unwrap().to_string_lossy()}" 
+                }
+                div { style: "display: inline-flex; width: 20%", "Folder" }
+                div { style: "display: inline-flex; width; 20%", "{date}" }
             }
         }
         if *is_expanded.read() {

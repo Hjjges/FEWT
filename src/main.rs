@@ -5,6 +5,7 @@ mod helpers;
 use dioxus::{logger::tracing, prelude::*};
 use components::{TopBar, SideBar, FileExplorer, TerminalComponent, BottomBar};
 use utils::{initialize_bash, initialize_dioxus_bridge, AppConfig, DirectoryContext, DirectoryHistory, ModeContext};
+use dioxus_desktop::use_muda_event_handler;
 
 static CSS: Asset = asset!("/assets/main.css");
 
@@ -15,6 +16,17 @@ fn main() {
 
 #[component]
 fn App() -> Element {
+    use_muda_event_handler(move |muda_event| {
+        println!("I REACHED IT OH MY GOD");
+        if muda_event.id() == "anton-copies" {
+            tracing::info!("ANTON COPIED");
+        } else if muda_event.id() == "anton-pastes" {
+            tracing::info!("ANTON PASTED");
+        }
+    });
+
+
+
     let mut initialized = use_signal(|| false);
 
     let env = std::env::current_dir().unwrap();
@@ -32,6 +44,8 @@ fn App() -> Element {
     tracing::info!("{:#?}", test);
     // End testing
 
+
+    // These need to get evaluated because they are re-running on each app render, which is obviously not what
     initialize_bash();
     initialize_dioxus_bridge();
 

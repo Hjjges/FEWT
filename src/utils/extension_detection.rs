@@ -213,9 +213,9 @@ pub enum FileType {
     Msi,
 
     // Special cases
-    #[strum(to_string = "No Extension")]
+    #[strum(to_string = "File")] // no extension
     None,
-    #[strum(to_string = "Unknown Type")]
+    #[strum(to_string = "Unknown")]
     Unknown(String),
 }
 

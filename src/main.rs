@@ -15,6 +15,8 @@ static DIR_HISTORY: GlobalSignal<Vec<String>> = Signal::global(|| vec![UserDirs:
 static CURRENT_DIR: GlobalSignal<String> = Signal::global(|| UserDirs::new().expect("UserDirs failed").home_dir().to_string_lossy().into_owned());
 static CURRENT_MODE: GlobalSignal<bool> = Signal::global(|| false);
 static COPIED_PATH: GlobalSignal<String> = Signal::global(|| String::from(""));
+static SORT: GlobalSignal<String> = Signal::global(|| String::from("name"));
+
 //static mut INITIALIZED: bool = false;
 
 fn main() {

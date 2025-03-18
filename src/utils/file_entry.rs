@@ -1,5 +1,6 @@
 use std::fs;
 use std::path::PathBuf;
+use crate::utils::extension_detection::{detect_extension, FileType};
 use chrono::{DateTime, Utc};
 
 #[derive(Debug, Clone, PartialEq)]
@@ -9,6 +10,7 @@ pub struct FileEntry {
     pub path_string: String,
     pub is_dir: bool,
     pub modified: String,
+    pub extension: FileType,
 }
 
 impl FileEntry {
@@ -20,12 +22,20 @@ impl FileEntry {
             date = datetime.format("%Y-%m-%d %H:%M:%S").to_string();
         }
 
+        let extension: FileType;
+        if let Some(result) = entry.path().extension() {
+            extension = detect_extension(result.to_string_lossy().to_string());
+        } else {
+            extension = FileType::None;
+        }
+
         Ok(Self {
             name: entry.file_name().to_string_lossy().into_owned(),
             path: entry.path(),
             path_string: entry.path().to_string_lossy().to_string(),
             is_dir: metadata.is_dir(),
             modified: date,
+            extension,
         })
     }
 }

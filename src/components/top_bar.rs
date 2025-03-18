@@ -1,21 +1,19 @@
 use dioxus::prelude::*;
 use dioxus::logger::tracing;
 use std::path::PathBuf;
-use std::rc::Rc;
 
-use crate::utils::{DirectoryContext, DirectoryHistory, ModeContext};
+use crate::{CURRENT_DIR, CURRENT_MODE, DIR_HISTORY};
 
 #[component]
 pub fn TopBar() -> Element {
-    let dir = Rc::new(use_context::<DirectoryContext>().current_directory.read().to_string());
     rsx! {
         div { class: "top-bar",
             div { class: "top-bar-content", 
                 // new custom top
                 div { style: "display: flex; font-size: 18px; color: turquoise; padding: 4px; margin: 4px; border: 1px solid turquoise", 
-                    BackArrow { dir: dir.clone() }
-                    ForwardArrow { dir: dir.clone() }
-                    div { style: "margin: 0 8px", "{dir}" }
+                    BackArrow { }
+                    ForwardArrow { }
+                    div { style: "margin: 0 8px", "{CURRENT_DIR}" }
                 }
             }
             ChangeMode { }
@@ -24,14 +22,16 @@ pub fn TopBar() -> Element {
 }
 
 #[component]
-fn BackArrow(dir: String) -> Element {
+fn BackArrow() -> Element {
+
     rsx! {
         div { class: "arrows-path-navigation icon",
             onclick: move |_| {
-                if let Some(parent) = PathBuf::from(&dir).parent() {
+                let path = PathBuf::from(&CURRENT_DIR());
+                if let Some(parent) = path.parent() {
                     let str = parent.to_string_lossy().to_string();
-                    consume_context::<DirectoryContext>().current_directory.set(str.clone());
-                    consume_context::<DirectoryHistory>().directory_history.write().push(dir.clone())
+                    *CURRENT_DIR.write() = str.clone();
+                    DIR_HISTORY.write().push(CURRENT_DIR());
                 } else {
                     tracing::warn!("No back directories remaining in stack");
                 }
@@ -42,14 +42,14 @@ fn BackArrow(dir: String) -> Element {
 }
 
 #[component]
-fn ForwardArrow(dir: String) -> Element {
+fn ForwardArrow() -> Element {
     rsx! {
         div { style: "margin-left: 8px", class: "arrows-path-navigation icon",
             onclick: move |_| {
                 // if the new path goes into a new directory structure, remove any directories in the stack that were in a old route.
-                let history = consume_context::<DirectoryHistory>().directory_history.write().pop();
+                let history = DIR_HISTORY.write().pop();
                 if let Some(popped_dir) = history {
-                    consume_context::<DirectoryContext>().current_directory.set(popped_dir);
+                    *CURRENT_DIR.write() = popped_dir;
                 } else {
                     tracing::warn!("No forward directories left in stack");
                 }
@@ -65,10 +65,7 @@ fn ChangeMode() -> Element {
         div { 
             style: "display: flex; justify-content: center; align-items: center; cursor: pointer;", 
             class: "icon", 
-            onclick: move |_| {
-                let read_mode = *use_context::<ModeContext>().mode.read();
-                consume_context::<ModeContext>().mode.set(!read_mode)
-            },
+            onclick: move |_| { *CURRENT_MODE.write() = !CURRENT_MODE() },
             "[=]" 
         }
     }

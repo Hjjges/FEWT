@@ -1,2 +1,2 @@
-mod get_paths;
-pub use get_paths::get_paths;
+mod get_entries;
+pub use get_entries::get_entries;

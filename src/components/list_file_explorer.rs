@@ -1,10 +1,8 @@
 use dioxus::prelude::*;
-use std::path::PathBuf;
-use std::fs;
-use chrono::{DateTime, Utc};
 
-use crate::utils::{DioxusContextMenu, detect_extension, CurrentCopiedPath};
-use crate::helpers::get_paths;
+use crate::COPIED_PATH;
+use crate::utils::{DioxusContextMenu, detect_extension, FileEntry};
+use crate::helpers::get_entries;
 use crate::components::FileExplorer;
 
 const IMG_FILE: Asset = asset!("/assets/icons8-file.svg");
@@ -12,7 +10,7 @@ const IMG_FOLDER: Asset = asset!("/assets/folder-svgrepo-com.svg");
 
 #[component]
 pub fn ListFileExplorer(dir_path: String, level: usize) -> Element {
-    let paths = get_paths(dir_path);
+    let entries = get_entries(dir_path).unwrap(); // handle this error later
     rsx! {
         div {
             style: "display: flex; flex-direction: column;",
@@ -24,11 +22,11 @@ pub fn ListFileExplorer(dir_path: String, level: usize) -> Element {
                     div { style: "display: inline-flex; width; 20%", "Last Modified" }
                 }
             }
-            for path in paths {
-                if path.path().is_dir() {
-                    ListFolder { path: path.path(), level: level }
+            for entry in entries {
+                if entry.is_dir {
+                    ListFolder { entry, level: level }
                 } else {
-                    ListFile { path: path.path(), level: level }
+                    ListFile { entry, level: level }
                 }
             }
         }
@@ -36,18 +34,9 @@ pub fn ListFileExplorer(dir_path: String, level: usize) -> Element {
 }
 
 #[component]
-fn ListFile(path: PathBuf, level: usize) -> Element { 
+fn ListFile(entry: FileEntry, level: usize) -> Element { 
     let mut focused = use_signal(|| false);
-
-    let metadata = fs::metadata(&path)?;
-    let mut date = "--".to_string();
-
-    if let Ok(modified) = metadata.modified() {
-        let datetime: DateTime<Utc> = modified.into();
-        date = datetime.format("%Y-%m-%d %H:%M:%S").to_string();
-    }
-
-    let background_color = use_memo(move || { if focused() {"#334"} else {"#333"}});
+    let background_color = use_memo(move || { if focused() {"#334"} else {"#181818"}});
 
     rsx! {
         div {
@@ -58,39 +47,30 @@ fn ListFile(path: PathBuf, level: usize) -> Element {
             style: "padding: 4px 4px 4px {level * 22 + 10}px; background-color: {background_color};",
 
             div { style: "font-size: 14px", 
-                oncontextmenu: move |e| {
-                    e.prevent_default(); 
-                    consume_context::<CurrentCopiedPath>().path.set(path.to_string_lossy().to_owned().to_string());
+                oncontextmenu: move |e| { e.prevent_default(); 
+                    *COPIED_PATH.write() = entry.path_string.clone();
                     DioxusContextMenu::default();
                 },
                 div { style: "display: inline-flex; width: 60%", 
                     img { src: IMG_FILE, style: "width: 16px; height: 18px; padding-right: 8px;"}
-                    "{path.file_name().unwrap().to_string_lossy()}" 
+                    "{entry.name}" 
                 }
-                if let Some(ext) = path.extension() {
+                if let Some(ext) = entry.path.extension() {
                     div { style: "display: inline-flex; width: 20%", "{detect_extension(ext.to_string_lossy().to_string())} " }
                 } else {
                     div { style: "display: inline-flex; width: 20%", "File" }
                 }
-                div { style: "display: inline-flex; width; 20%", "{date}" }
+                div { style: "display: inline-flex; width; 20%", "{entry.modified}" }
             }
         }
     }
 }
 
 #[component]
-fn ListFolder(path: PathBuf, level: usize) -> Element {
+fn ListFolder(entry: FileEntry, level: usize) -> Element {
     let mut is_expanded = use_signal(|| false);
     let mut focused = use_signal(|| false);
-    let metadata = fs::metadata(&path)?;
-    let mut date = "--".to_string();
-
-    if let Ok(modified) = metadata.modified() {
-        let datetime: DateTime<Utc> = modified.into();
-        date = datetime.format("%Y-%m-%d %H:%M:%S").to_string();
-    }
-
-    let background_color = use_memo(move || { if focused() {"#334"} else {"#333"}});
+    let background_color = use_memo(move || { if focused() {"#334"} else {"#181818"}});
 
     rsx! {
         div {
@@ -103,9 +83,8 @@ fn ListFolder(path: PathBuf, level: usize) -> Element {
 
             div { style: "font-size: 14px;", 
                 div { style: "display: inline-flex; width: 60%;", 
-                    oncontextmenu: move |e| {
-                        e.prevent_default(); 
-                        consume_context::<CurrentCopiedPath>().path.set(path.to_string_lossy().to_owned().to_string());
+                    oncontextmenu: move |e| { e.prevent_default(); 
+                        *COPIED_PATH.write() = entry.path_string.clone();
                         DioxusContextMenu::default();
                     },
                     if is_expanded()
@@ -113,14 +92,14 @@ fn ListFolder(path: PathBuf, level: usize) -> Element {
                     else
                         { div { style: "color: turquoise; margin-right: 8px;", " → "} }
                     img { src: IMG_FOLDER, style: "width: 16px; height: 18px; padding-right: 8px;"}
-                    "{path.file_name().unwrap().to_string_lossy()}" 
+                    "{entry.name}" 
                 }
                 div { style: "display: inline-flex; width: 20%", "Folder" }
-                div { style: "display: inline-flex; width; 20%", "{date}" }
+                div { style: "display: inline-flex; width; 20%", "{entry.modified}" }
             }
         }
         if *is_expanded.read() {
-            FileExplorer { dir_path: path.to_string_lossy(), level: level + 1 } // Recursive call on FileExplorer
+            FileExplorer { dir_path: entry.path.to_string_lossy(), level: level + 1 } // Recursive call on FileExplorer
         }
     }
 }

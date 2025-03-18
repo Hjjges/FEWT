@@ -151,11 +151,12 @@ body {
     border-bottom: 4px solid #222;
     border-top: 2px solid #111; 
 
-    &:hover {
-        color: turquoise;
+    /* &:hover {
+        background-color: #DADADA;
+        color:black;
         border-bottom: 2px solid turquoise;
-        border-top: 2px solid turquoise; 
-    }
+        border-top: 2px solid turquoise;  
+    } */
 }
 
 /* =============== BOTTOM COMPONENTS =============== */
@@ -219,6 +220,12 @@ body {
 .button {
     padding: 16px;
     box-sizing: border-box;
+    cursor: default;
+    transition: color 0.3s ease;
+    font-size: 14px;
+    transition: border-bottom 0.3s ease, border-left 0.3s ease, border-top 0.3s ease;
+    margin-top: 2px;
+
 }
 
 .button-primary {
@@ -228,34 +235,47 @@ body {
 }
 
 .button-secondary {
-    cursor: default;
-    transition: color 0.3s ease;
-    font-size: 14px;
-
-
     background-color: #161719;
     border-top: 1px solid #333;
     border-bottom: 1px solid #333;
     border-left: 4px solid #399;
-    transition: border-bottom 0.3s ease, border-left 0.3s ease, border-top 0.3s ease;
-
 
     /*transition: background-color 0.3s ease;*/
     color: #a7acb1;
-
-    margin-top: 2px;
-
     div {
         display: inline-block;
         transition: transform 0.3s ease;
     }
-
     &:hover {
-
         /* Dynamicaly move border to the right, changing it to turq */
         border-left: 16px solid turquoise;
         border-top: 1px solid turquoise;
         border-bottom: 1px solid turquoise;
+        /* Move the text 5px to the right and change color */
+        div {
+            color: white;
+            transform: translateX(5px);
+        }
+    }
+}
+
+.button-favourites {
+    background-color: #161719;
+    border-top: 1px solid #333;
+    border-bottom: 1px solid #333;
+    border-left: 4px solid orange;
+
+    /*transition: background-color 0.3s ease;*/
+    color: #a7acb1;
+    div {
+        display: inline-block;
+        transition: transform 0.3s ease;
+    }
+    &:hover {
+        /* Dynamicaly move border to the right, changing it to turq */
+        border-left: 16px solid orangered;
+        border-top: 1px solid orangered;
+        border-bottom: 1px solid orangered;
         /* Move the text 5px to the right and change color */
         div {
             color: white;
@@ -301,9 +321,3 @@ body {
         }
     }
 }
-
-.context-menu-divider {
-
-}
-
-

@@ -1,12 +1,19 @@
 use dioxus::logger::tracing;
+use dioxus::prelude::*;
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::env;
 use std::io;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use toml;
 use directories::{UserDirs, ProjectDirs};
 
+#[derive(Clone, Copy, PartialEq, Debug)]
+
+pub enum Genre {
+    Favourites,
+    QuickAccess,
+}
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct AppConfig {
@@ -53,11 +60,11 @@ impl AppConfig {
             .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?;
 
         tracing::info!("Config found and loaded");
-
         Ok(config)
     }
 
     pub fn save(&self) -> Result<(), io::Error> {
+        let mut app_config = try_use_context::<Signal<AppConfig>>().expect("Could not find AppConfig context");
         let config_path = Self::get_config_path();
         if let Some(parent) = config_path.parent() {
             fs::create_dir_all(parent)?;
@@ -67,17 +74,36 @@ impl AppConfig {
             .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?;
 
         tracing::info!("Writing to path: {}", config_path.to_string_lossy());
+
+        // Preferable solution would be to copy self directly into app_config, but seems I have to manually do each property instead.
+        app_config.with_mut(|current_config| {
+            current_config.favourites = self.favourites.clone();
+            current_config.quick_access = self.quick_access.clone();
+            current_config.tags = self.tags.clone();
+        });
+
         fs::write(config_path, toml_string)
     }
 
-    pub fn add_favorite(&mut self, path: PathBuf) {
-        if !self.favourites.contains(&path) {
-            self.favourites.push(path);
+    pub fn add_entry(&mut self, path: PathBuf, category: Genre) {
+        let target_list = self.get_target_list(category);
+        if !target_list.contains(&path) {
+            target_list.push(path);
+            self.save().expect("failed to save changes");
         }
     }
-    
-    pub fn remove_favorite(&mut self, path: &Path) {
-        self.favourites.retain(|p| p != path);
+
+    pub fn remove_entry(&mut self, path: PathBuf, category: Genre) {
+        let target_list = self.get_target_list(category);
+        target_list.retain(|p| *p != path);
+        self.save().expect("failed to save changes")
+    }
+
+    fn get_target_list(&mut self, category: Genre) -> &mut Vec<PathBuf> {
+        return match category {
+            Genre::Favourites => &mut self.favourites,
+            Genre::QuickAccess => &mut self.quick_access,
+        }
     }
 
     fn get_config_path() -> PathBuf {

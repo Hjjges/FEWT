@@ -4,66 +4,30 @@ use std::io::{BufRead, BufReader, Write};
 use std::fmt::Write as plat;
 use std::process::*;
 use std::thread;
+use std::path::PathBuf;
+use std::fs;
 use std::time::Duration;
 use std::sync::{Arc, Mutex};
 
 use crate::utils::ShellContext;
-
-use super::DirectoryContext;
+use crate::CURRENT_DIR;
 
 pub fn initialize_dioxus_bridge() -> Task {
-    let bridge_script = r#"
-    window.dioxusBridge = {
-        toRustQueue: [],
-        fromRustQueue: [],
-        waitCallbacks: [],
-
-        sendToRust: function(message) {
-            this.toRustQueue.push(message);
-        },
-
-        receiveFromRust: function() {
-            return new Promise((resolve) => {
-                if (this.fromRustQueue.length > 0) {
-                    resolve(this.fromRustQueue.shift());
-                } else {
-                    this.waitCallbacks.push(resolve);
-                }
-            });
-        }
-    }
-
-    console.log("Rust Macro - Dioxus Bridge Initialized");
-    "#;
-
-    document::eval(bridge_script);
+    let shell = use_context::<ShellContext>();
+    let dioxus_bridge = fs::read_to_string(PathBuf::from("js-src/dioxus_bridge.js")).expect("JS file is not valid");
+    document::eval(&dioxus_bridge);
 
     spawn(async move {
-        let mut eval = document::eval(r#"
-        async function processToRustQueue() {
-            while (true) {
-                if (window.dioxusBridge && window.dioxusBridge.toRustQueue.length > 0) {
-                    const message = window.dioxusBridge.toRustQueue.shift();
-                    console.log("Sending to Rust:", message);
-                    dioxus.send(message); // utilising dioxus rust macro context
-                }
-                await new Promise(resolve => setTimeout(resolve, 100));
-            }
-        }
-        processToRustQueue();
-        "#);
-
+        let process_queue = fs::read_to_string(PathBuf::from("js-src/process_queue.js")).expect("JS file is not valid");
+        let mut eval = document::eval(&process_queue);
         while let Ok(message) = eval.recv::<String>().await {
             tracing::info!("Received from JS: {}", message);
-            let shell = use_context::<ShellContext>();
             send_command(&shell, &message);
         }
     })
 }
 
 pub fn send_command(shell: &ShellContext, command: &str) {
-
-
     // im thinking wrap this into a use_resource hook, return the value and then display terminal output.
     // although the issue here is that you write to stdin and stdout is populated, so its not a 'taskable' resource
     shell.stdout.lock().unwrap().clear();
@@ -94,7 +58,7 @@ pub fn send_command(shell: &ShellContext, command: &str) {
         let raw_output_b = stdout_clone_b.lock().unwrap().join("");
 
         // slight issue: it has the whole history when trying to change directory.
-        consume_context::<DirectoryContext>().current_directory.set(raw_output_b);
+        *CURRENT_DIR.write() = raw_output_b;
     }
 }
 
@@ -124,9 +88,9 @@ pub fn check_directory_from_bash(shell: &ShellContext) {
     let output = stdout.lock().unwrap();
 
     for line in output.iter() {
-        let current_dir = use_context::<DirectoryContext>().current_directory;
-        if current_dir.read().to_string() != line.clone() {
-            consume_context::<DirectoryContext>().current_directory.set(line.clone());
+        if CURRENT_DIR() != line.clone() {
+            *CURRENT_DIR.write() = line.clone();
+
         }
     }
 }
@@ -143,8 +107,6 @@ pub fn initialize_bash() {
 
     let stdin = Arc::new(Mutex::new(child.stdin.take().expect("Failed to open stdin")));
     let stdout = Arc::new(Mutex::new(vec![]));
-
-
     let stdout_clone = stdout.clone();
     let reader = BufReader::new(child.stdout.take().expect("Failed to open stdout"));
     thread::spawn(move || {
@@ -154,15 +116,6 @@ pub fn initialize_bash() {
             }
         }
     });
-
-    // let stdout_clone_b = stdout.clone();
-    // thread::spawn(move || {
-    //     loop {
-    //         thread::sleep(Duration::from_secs(15));
-    //         let output = stdout_clone_b.lock().unwrap();
-    //         tracing::info!("Shell Output History:\n{}", output.join("\n"));
-    //     }
-    // });
 
     use_context_provider(|| ShellContext {
         stdin,

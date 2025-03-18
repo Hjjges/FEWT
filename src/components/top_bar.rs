@@ -2,7 +2,7 @@ use dioxus::prelude::*;
 use dioxus::logger::tracing;
 use std::path::PathBuf;
 
-use crate::{CURRENT_DIR, CURRENT_MODE, DIR_HISTORY};
+use crate::{utils::DioxusContextMenu, CURRENT_DIR, DIR_HISTORY};
 
 #[component]
 pub fn TopBar() -> Element {
@@ -65,7 +65,9 @@ fn ChangeMode() -> Element {
         div { 
             style: "display: flex; justify-content: center; align-items: center; cursor: pointer;", 
             class: "icon", 
-            onclick: move |_| { *CURRENT_MODE.write() = !CURRENT_MODE() },
+            onclick: move |_| { 
+                DioxusContextMenu::file_explorer_modes();
+            },
             "[=]" 
         }
     }

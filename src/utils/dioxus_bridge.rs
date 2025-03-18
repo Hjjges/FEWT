@@ -1,7 +1,7 @@
 use dioxus::logger::tracing;
 use dioxus::prelude::*;
 use std::io::{BufRead, BufReader, Write};
-use std::fmt::Write as plat;
+//use std::fmt::Write as plat;
 use std::process::*;
 use std::thread;
 use std::path::PathBuf;
@@ -81,19 +81,19 @@ pub fn send_command(shell: &ShellContext, command: &str) {
             "#, 
             */
 
-pub fn check_directory_from_bash(shell: &ShellContext) {
-    let mut stdin = shell.stdin.lock().unwrap();
-    writeln!(stdin, "{}", "pwd").expect("Failed to write to shell");
-    let stdout = shell.stdout.clone();
-    let output = stdout.lock().unwrap();
+// pub fn check_directory_from_bash(shell: &ShellContext) {
+//     let mut stdin = shell.stdin.lock().unwrap();
+//     writeln!(stdin, "{}", "pwd").expect("Failed to write to shell");
+//     let stdout = shell.stdout.clone();
+//     let output = stdout.lock().unwrap();
 
-    for line in output.iter() {
-        if CURRENT_DIR() != line.clone() {
-            *CURRENT_DIR.write() = line.clone();
+//     for line in output.iter() {
+//         if CURRENT_DIR() != line.clone() {
+//             *CURRENT_DIR.write() = line.clone();
 
-        }
-    }
-}
+//         }
+//     }
+// }
 
 
 pub fn initialize_bash() {

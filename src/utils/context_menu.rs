@@ -1,6 +1,6 @@
 use dioxus::prelude::*;
 use dioxus_desktop::{tao::platform::macos::WindowExtMacOS, muda::*};
-use crate::utils::{AppConfig, Genre};
+use crate::utils::{AppConfig, Mode, Genre};
 use crate::COPIED_PATH;
 use arboard::Clipboard;
 use arboard::ImageData;
@@ -12,7 +12,7 @@ use image::GenericImageView;
 use cocoa::base::id;
 
 pub struct DioxusContextMenu {
-    menu: Menu,
+    //menu: Menu,
 }
 
 impl DioxusContextMenu {
@@ -26,13 +26,14 @@ impl DioxusContextMenu {
         menu.append_items(&[
             &option_copy,
             &option_paste,
+            &PredefinedMenuItem::separator(),
             &option_favourites,
             &option_quick_access,
         ]).unwrap();
         let ns_view = dioxus_desktop::use_window().ns_view();
         let ns_view_id: id = unsafe { std::mem::transmute(ns_view) };
         menu.show_context_menu_for_nsview(ns_view_id, None);
-        Self { menu }
+        Self {  }
     }
 
     pub fn side_bar(category: Genre) -> Self {
@@ -46,7 +47,23 @@ impl DioxusContextMenu {
         let ns_view = dioxus_desktop::use_window().ns_view();
         let ns_view_id: id = unsafe { std::mem::transmute(ns_view) };
         menu.show_context_menu_for_nsview(ns_view_id, None);
-        Self { menu }
+        Self {  }
+    }
+
+    pub fn file_explorer_modes() -> Self {
+        let menu = Menu::new();
+        let option_icon = MenuItem::with_id("icon-mode", "Icon Mode", true, None);
+        let option_list = MenuItem::with_id("list-mode", "List Mode", true, None);
+        let option_column = MenuItem::with_id("column-mode", "Column Mode", true, None);
+        menu.append_items(&[
+            &option_icon,
+            &option_list,
+            &option_column,
+        ]).unwrap();
+        let ns_view = dioxus_desktop::use_window().ns_view();
+        let ns_view_id: id = unsafe { std::mem::transmute(ns_view) };
+        menu.show_context_menu_for_nsview(ns_view_id, None);
+        Self {  }
     }
 
     pub fn muda_handler(app_config: Signal<AppConfig>, muda_event: &MenuEvent) {
@@ -71,6 +88,9 @@ impl DioxusContextMenu {
             "add-quick-access" => app_config().add_entry(copied_path, Genre::QuickAccess),
             "remove-favourite" => app_config().remove_entry(copied_path, Genre::Favourites),
             "remove-quick-access" => app_config().remove_entry(copied_path, Genre::QuickAccess),
+            "icon-mode" => { *consume_context::<Signal<Mode>>().write() = Mode::Icon },
+            "list-mode" => { *consume_context::<Signal<Mode>>().write() = Mode::List },
+            "column-mode" => { *consume_context::<Signal<Mode>>().write() = Mode::Column },
             _ => {} // Handle unknown events gracefully
         }
     }

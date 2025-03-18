@@ -1,7 +1,7 @@
 use dioxus::prelude::*;
 
 use crate::{SORT, COPIED_PATH};
-use crate::utils::{DioxusContextMenu, detect_extension, FileEntry};
+use crate::utils::{DioxusContextMenu, FileEntry};
 use crate::helpers::get_entries;
 use crate::components::FileExplorer;
 
@@ -33,7 +33,7 @@ pub fn ListFileExplorer(dir_path: String, level: usize) -> Element {
         }
     }
 }
-// ↑
+
 #[component]
 fn Headers(header_type: String, desc: String, width: String, sort_down: Signal<bool>) -> Element {
     let header = header_type.clone();
@@ -54,6 +54,7 @@ fn Headers(header_type: String, desc: String, width: String, sort_down: Signal<b
                     *SORT.write() = format!("-{}", header_type.clone());
                 }
                 *sort_down.write() = !sort_down();
+                
             },
             "{sort_arrow} {desc}"
         }

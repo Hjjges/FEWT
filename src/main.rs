@@ -5,7 +5,7 @@ mod helpers;
 use dioxus::prelude::*;
 use dioxus_desktop::use_muda_event_handler;
 use components::{TopBar, SideBar, FileExplorer, TerminalComponent, BottomBar};
-use utils::{initialize_bash, initialize_dioxus_bridge, AppConfig, DioxusContextMenu};
+use utils::{initialize_bash, initialize_dioxus_bridge, AppConfig, Mode, DioxusContextMenu};
 use directories::UserDirs;
 
 static CSS: Asset = asset!("/assets/main.css");
@@ -13,7 +13,6 @@ static CSS: Asset = asset!("/assets/main.css");
 // Globals
 static DIR_HISTORY: GlobalSignal<Vec<String>> = Signal::global(|| vec![UserDirs::new().expect("Failed to get UserDirs").home_dir().to_string_lossy().into_owned()]);
 static CURRENT_DIR: GlobalSignal<String> = Signal::global(|| UserDirs::new().expect("UserDirs failed").home_dir().to_string_lossy().into_owned());
-static CURRENT_MODE: GlobalSignal<bool> = Signal::global(|| false);
 static COPIED_PATH: GlobalSignal<String> = Signal::global(|| String::from(""));
 static SORT: GlobalSignal<String> = Signal::global(|| String::from("name"));
 
@@ -26,6 +25,7 @@ fn main() {
 #[component]
 fn App() -> Element {
     let app_config = use_context_provider(|| Signal::new(AppConfig::load().expect("Failed to load config")));
+    use_context_provider(|| Signal::new(Mode::Icon));
 
     initialize_bash();
     initialize_dioxus_bridge();

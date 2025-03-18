@@ -9,10 +9,16 @@ use toml;
 use directories::{UserDirs, ProjectDirs};
 
 #[derive(Clone, Copy, PartialEq, Debug)]
-
 pub enum Genre {
     Favourites,
     QuickAccess,
+}
+
+#[derive(Clone, Copy, PartialEq, Debug)]
+pub enum Mode {
+    Icon,
+    List,
+    Column
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

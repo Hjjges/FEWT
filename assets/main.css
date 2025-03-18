@@ -100,8 +100,9 @@ body {
 .file-explorer {
     background-color: #1f1f1f;
 
-    overflow-x: hidden;
-    overflow-y: scroll;
+    overflow-x: scroll;
+    /* overflow-x: hidden; */
+    /* overflow-y: scroll; */
 
     /* Middle - Right */
     grid-row: 2/3;

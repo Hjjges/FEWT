@@ -8,8 +8,8 @@ const IMG_FILE: Asset = asset!("/assets/icons8-file.svg");
 const IMG_FOLDER: Asset = asset!("/assets/folder-svgrepo-com.svg");
 
 #[component]
-pub fn IconFileExplorer(dir_path: String) -> Element {
-    let entries = get_entries(dir_path).unwrap();
+pub fn IconFileExplorer() -> Element {
+    let entries = get_entries(CURRENT_DIR()).unwrap();
     rsx! {
         div {
             style: "display: inline-flex; flex-wrap: wrap; gap: 10%",

@@ -7,9 +7,9 @@ use crate::utils::Mode;
 pub fn FileExplorer(dir_path: String, level: usize) -> Element {
     let mode = use_context::<Signal<Mode>>()();
     let content = match mode {
-        Mode::Icon => rsx!(IconFileExplorer { dir_path }),
+        Mode::Icon => rsx!(IconFileExplorer { }),
         Mode::List => rsx!(ListFileExplorer { dir_path, level }),
-        Mode::Column => rsx!(ColumnFileExplorer { dir_path, level })
+        Mode::Column => rsx!(ColumnFileExplorer { })
     };
     rsx! {
         div { class: "file-explorer",

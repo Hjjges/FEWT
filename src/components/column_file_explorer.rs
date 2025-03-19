@@ -1,42 +1,60 @@
 use dioxus::prelude::*;
 use dioxus::logger::tracing;
-use std::path::PathBuf;
 use std::fs;
-
-use crate::COPIED_PATH;
+use crate::{CURRENT_DIR, COPIED_PATH};
 use crate::utils::{DioxusContextMenu, FileEntry};
 use crate::helpers::get_entries;
-use crate::components::FileExplorer;
 
 const IMG_FILE: Asset = asset!("/assets/icons8-file.svg");
 const IMG_FOLDER: Asset = asset!("/assets/folder-svgrepo-com.svg");
 
-// Clicking back should remove the latest column in the vec?
-
 #[component]
-pub fn ColumnFileExplorer(dir_path: String, level: usize) -> Element {
-    let mut columns = use_signal(|| vec![ dir_path.clone() ]);
-    rsx! {
-        div { style: "display: grid; grid-auto-flow: column; grid-template-columns: repeat(auto-fit, 300px); overflow-x: auto;",
+pub fn ColumnFileExplorer() -> Element {
+    let mut columns = use_signal(|| vec![ CURRENT_DIR() ]);
+
+    use_effect(move || {
+        if CURRENT_DIR() != *columns().get(0).unwrap() { *columns.write() = vec![ CURRENT_DIR() ]}
+        tracing::info!("{:?}", columns());
+
+    });
+    rsx! { 
+        div { style: "display: grid; grid-auto-flow: column; grid-template-columns: repeat(auto-fit, 300px); height: 100%; overflow-x: scroll;",
             for (index, column) in columns().iter().enumerate() {
-                Column { dir_path: column, level: index, columns }
+                Column { dir_path: column, columns }
             }
         }
     }
 }
 
 #[component]
-fn Column(dir_path: String, level: usize, columns: Signal<Vec<String>>) -> Element {
-    let entries = get_entries(dir_path).unwrap();
-    rsx! {
-        div { style: "width: 300px; box-sizing: border-box; flex-shrink: 0; overflow-y: scroll; border-right: 1px solid #333;", 
-            div { style: "display: flex; flex-direction: column;",
-                for entry in entries.clone() {
-                    if entry.is_dir {
-                        ColumnFolder { entry, level, columns }
-                    } else {
-                        ColumnFile { entry, level }
+fn Column(dir_path: String, columns: Signal<Vec<String>>) -> Element {
+
+
+    // we must check if dir_path is an actual dir or not.
+    let metadata = fs::metadata(dir_path.clone()).unwrap();
+    if metadata.is_dir() {
+        let entries = get_entries(dir_path.clone()).unwrap();
+        rsx! {
+            div { style: "width: 300px; box-sizing: border-box; border-right: 1px solid #333; flex-shrink: 0; overflow: auto;", 
+                div { style: "display: flex; flex-direction: column;",
+                    for entry in entries.clone() {
+                        if entry.is_dir {
+                            ColumnFolder { entry, columns }
+                        } else {
+                            ColumnFile { entry, columns }
+                        }
                     }
+                }
+            }
+        }
+    } else {
+        let entry: FileEntry = FileEntry::new_file(dir_path.clone(), metadata).unwrap();
+        let file_content = std::fs::read_to_string(entry.path_string).unwrap_or_else(|_| "Failed to load file".to_string());
+        rsx! {
+            div { style: "width: 80vh; box-sizing: border-box; border-right: 1px solid #333; flex-shrink: 0; overflow: auto;", 
+                div { style: "width: 100%; height: 100%",
+                    div { style: "border-radius: 4px; height: 40vh; border: 1px solid #333; padding: 16px 16px; margin: 16px 16px; overflow: auto;", pre { style: "white-space: pre-wrap; font-size: 14px;", {file_content} } }
+                    div { style: "font-size: 16px; text-align: center", {entry.name} }
                 }
             }
         }
@@ -44,17 +62,41 @@ fn Column(dir_path: String, level: usize, columns: Signal<Vec<String>>) -> Eleme
 }
 
 #[component]
-fn ColumnFile(entry: FileEntry, level: usize) -> Element {
-    let mut focused = use_signal(|| false);
-    let background_color = use_memo(move || { if focused() {"#334"} else {"#181818"}});
+fn ColumnFile(entry: FileEntry, columns: Signal<Vec<String>>) -> Element {
+    let copy = entry.path_string.clone();
+    let copy2 = entry.path_string.clone();
+    let is_expanded: Memo<bool> = use_memo(move || columns().contains(&entry.path_string));
+    let background_color = use_memo(move || { if is_expanded() {"#334"} else {"#181818"}});
+    let mut vec_columns = columns().clone();
+
 
     rsx! {
         div {
             onclick: move |_| {
-                focused.toggle();
-            },
+                let new_path = &copy2;
+                if !*is_expanded.read() {
+                    let parent_path = match new_path.rfind('/') {
+                        Some(index) if index > 0 => &new_path[0..=index],
+                        _ => "/",
+                    };
+                    let matching_index = vec_columns.iter().position(|path| path.starts_with(parent_path) && path != parent_path);
+                    if let Some(index) = matching_index {
+                        vec_columns.truncate(index);
+                    }
+                    vec_columns.push(new_path.clone());
+                    *columns.write() = vec_columns.clone();
+                } else if *is_expanded.read() && !columns().contains(&copy2) {
+                    while let Some(popped) = vec_columns.pop() {
+                        if popped == copy2 { break }
+                    }
+                    if vec_columns.len() != 0 {
+                        *columns.write() = vec_columns.clone();
+                    }
+                }
+
+             },
             oncontextmenu: move |e| { e.prevent_default();
-                *COPIED_PATH.write() = entry.path_string.clone();
+                *COPIED_PATH.write() = copy.clone();
                 DioxusContextMenu::default();
             },
             class: "list-file",
@@ -69,45 +111,38 @@ fn ColumnFile(entry: FileEntry, level: usize) -> Element {
 }
 
 #[component]
-fn ColumnFolder(entry: FileEntry, level: usize, columns: Signal<Vec<String>>) -> Element {
-    let mut is_expanded = use_signal(|| false);
-    let mut focused = use_signal(|| false);
+fn ColumnFolder(entry: FileEntry, columns: Signal<Vec<String>>) -> Element {
     let copy = entry.path_string.clone();
-    let background_color = use_memo(move || { if focused() {"#334"} else {"#181818"}});
-
+    let copy2 = entry.path_string.clone();
+    let is_expanded: Memo<bool> = use_memo(move || columns().contains(&entry.path_string));
+    let background_color = use_memo(move || { if is_expanded() {"#334"} else {"#181818"}});
     let mut vec_columns = columns().clone();
 
-    use_effect(move || {
-        // If it is expanded and the current columns don't contain the path, add it to the column signal vector
-        if *is_expanded.read() && !columns.write().contains(&entry.path_string){
-            columns.write().push(entry.path_string.clone());
-
-        // If it is not expanded (e.g. you just clicked to turn it off), find the existing index of that column entry and remove everything after it
-        } else if !*is_expanded.read() {
-            tracing::info!("value of entry: {:?}", entry.path_string.clone());
-            tracing::info!("before: {:?}", vec_columns);
-            while let Some(popped) = vec_columns.pop() {
-                if popped == entry.path_string.clone() {
-                    break;
-                }
-            }
-            tracing::info!("after: {:?}", vec_columns);
-            // copy resulting vec_columns into the column signal vector - if length is 0, means we didn't find a match, meaning they tried to open new folders.
-            // consider doing this check in the beginning by doing vec_columns.contains(&entry.path_string) ? break. - it will avoid unnecessary pops and computation
-            if vec_columns.len() != 0 {
-                *columns.write() = vec_columns.clone();
-            }
-
-            // additionally, its possible to open multiple layers even though theyre at the same level. Check if the index after the current one is empty, if its
-            // empty, then its ok to add. Otherwise, its not ok, remove the existing index and then replace it with the new one.
-        }
-    });
 
     rsx! {
         div {
             onclick: move |_| {
-                is_expanded.toggle();
-                focused.toggle();
+                let new_path = &copy2;
+                if !*is_expanded.read() {
+                    let parent_path = match new_path.rfind('/') {
+                        Some(index) if index > 0 => &new_path[0..=index],
+                        _ => "/",
+                    };
+                    let matching_index = vec_columns.iter().position(|path| path.starts_with(parent_path) && path != parent_path);
+                    if let Some(index) = matching_index {
+                        vec_columns.truncate(index);
+                    }
+                    vec_columns.push(new_path.clone());
+                    *columns.write() = vec_columns.clone();
+                } else if *is_expanded.read() && !columns().contains(&copy2) {
+                    while let Some(popped) = vec_columns.pop() {
+                        if popped == copy2 { break }
+                    }
+                    if vec_columns.len() != 0 {
+                        *columns.write() = vec_columns.clone();
+                    }
+                }
+
              },
              oncontextmenu: move |e| { e.prevent_default();
                 *COPIED_PATH.write() = copy.clone();

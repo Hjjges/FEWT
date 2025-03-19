@@ -46,5 +46,27 @@ fn App() -> Element {
             BottomBar {  }
             TerminalComponent { }
         }
+
+        // div { class: "file-explorer",
+        // div { style: "display: grid; grid-auto-flow: column; grid-template-columns: repeat(auto-fit, 300px); height: 100vh; overflow-x: scroll;",
+        //     div { style: "width: 300px; box-sizing: border-box; border-right: flex-shrink: 0; 1px solid #333; overflow: auto;", 
+        //         div { style: "display: flex; flex-direction: column;",
+        //             div { "hello" } div { "hello2" } div { "hello2" } div { "hello2" } div { "hello2" } div { "hello2" } div { "hello2" } div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello" } div { "hello2" } div { "hello2" } div { "hello2" } div { "hello2" } div { "hello2" } div { "hello2" } div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello" } div { "hello2" } div { "hello2" } div { "hello2" } div { "hello2" } div { "hello2" } div { "hello2" } div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }
+        //         }
+        //     }
+        //     div { style: "width: 300px; box-sizing: border-box; border-right: 1px solid #333; overflow: auto;", 
+        //         div { style: "display: flex; flex-direction: column;",
+        //             div { "hello" } div { "hello2" } div { "hello2" } div { "hello2" } div { "hello2" } div { "hello2" } div { "hello2" } div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello" } div { "hello2" } div { "hello2" } div { "hello2" } div { "hello2" } div { "hello2" } div { "hello2" } div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello" } div { "hello2" } div { "hello2" } div { "hello2" } div { "hello2" } div { "hello2" } div { "hello2" } div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }
+        //         }
+        //     }
+        //     div { style: "width: 300px; box-sizing: border-box; border-right: 1px solid #333; overflow: auto;", 
+        //         div { style: "display: flex; flex-direction: column;",
+        //             div { "hello" } div { "hello2" } div { "hello2" } div { "hello2" } div { "hello2" } div { "hello2" } div { "hello2" } div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello" } div { "hello2" } div { "hello2" } div { "hello2" } div { "hello2" } div { "hello2" } div { "hello2" } div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello" } div { "hello2" } div { "hello2" } div { "hello2" } div { "hello2" } div { "hello2" } div { "hello2" } div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }
+        //         }
+        //     }
+        //     div { style: "width: 300px; box-sizing: border-box; border-right: 1px solid #333; overflow: auto;", 
+        //     div { style: "display: flex; flex-direction: column;",
+        //         div { "hello" } div { "hello2" } div { "hello2" } div { "hello2" } div { "hello2" } div { "hello2" } div { "hello2" } div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello" } div { "hello2" } div { "hello2" } div { "hello2" } div { "hello2" } div { "hello2" } div { "hello2" } div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello" } div { "hello2" } div { "hello2" } div { "hello2" } div { "hello2" } div { "hello2" } div { "hello2" } div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }div { "hello2" }
+        //     }
     }
 }
